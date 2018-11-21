@@ -7,10 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -18,6 +15,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.omg.PortableInterceptor.INACTIVE;
 
 import java.sql.*;
 import java.util.Calendar;
@@ -29,26 +27,23 @@ public class Main extends Application {
     Label countDownLabel = new Label("");
     double height = 600;
     double width = 800;
-    Runnable timer = new Runnable() {
-        @Override
-        public void run() {
-            while (true){
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        long timeTillRaceMilli = raceDate.getTimeInMillis() - System.currentTimeMillis();
-                        long days = timeTillRaceMilli/86400000;
-                        long hours = (timeTillRaceMilli%86400000)/3600000;
-                        long mins = ((timeTillRaceMilli%86400000)%3600000)/60000;
-                        long secs = (((timeTillRaceMilli%86400000)%3600000)%60000)/1000;
-                        countDownLabel.setText(days+" Days "+hours+" Hours "+mins+" Mins "+secs+" Seconds untill marathon start!");
-                    }
-                });
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+    Runnable timer = () -> {
+        while (true){
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    long timeTillRaceMilli = raceDate.getTimeInMillis() - System.currentTimeMillis();
+                    long days = timeTillRaceMilli/86400000;
+                    long hours = (timeTillRaceMilli%86400000)/3600000;
+                    long mins = ((timeTillRaceMilli%86400000)%3600000)/60000;
+                    long secs = (((timeTillRaceMilli%86400000)%3600000)%60000)/1000;
+                    countDownLabel.setText(days+" Days "+hours+" Hours "+mins+" Mins "+secs+" Seconds untill marathon start!");
                 }
+            });
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     };
@@ -57,13 +52,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cpt02?useSSL=False","root","omar");
+        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cpt01?useSSL=False","root","omar");
         window = primaryStage;
         raceDate.set(2019,8,5,6,0);
         countDownThrd.start();
         countDownLabel.setFont(Font.font("Open Sans",FontWeight.SEMI_BOLD,18));
 
-        screen6();
+        screen1();
     }
 
     public void screen0(){
@@ -126,6 +121,15 @@ public class Main extends Application {
         topBox.setStyle("-fx-background-color: #339966");
         bottomBox.setStyle("-fx-background-color: #339966");
 
+        sponsorButt.setOnAction(val -> {
+            try {
+                screen6();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        infoButt.setOnAction(val -> screen10());
+
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
     }
@@ -177,13 +181,13 @@ public class Main extends Application {
         //right side--------------------------
         Label charityLabel = new Label("Charity");
         Label charityName = new Label();
-        Button infoButt = new Button("i");
+        Button infoButt = new Button(" i ");
         HBox charityElement = new HBox(charityName,infoButt);
         Label amountToDonate = new Label("Amount to donate");
         Label amountLabel = new Label("$0");
         Button minusButt = new Button(" - ");
         Button plusButt = new Button("+");
-        TextField amountField = new TextField();
+        TextField amountField = new TextField("0");
         HBox amountElement = new HBox(minusButt,amountField,plusButt);
         Button payButt = new Button("pay now");
         Button cancelButt = new Button("Cancel");
@@ -195,7 +199,8 @@ public class Main extends Application {
         rightSide.setAlignment(Pos.CENTER);
         amountElement.setAlignment(Pos.CENTER);
         buttonsBox.setAlignment(Pos.CENTER);
-        charityElement.setAlignment(Pos.CENTER_RIGHT);
+        charityElement.setAlignment(Pos.CENTER);
+        infoButt.setVisible(false);
         //---------------------------------------------------
         HBox bothSides = new HBox(leftSide,rightSide);
         VBox mainBox = new VBox(titleLabel,desc,bothSides);
@@ -241,7 +246,7 @@ public class Main extends Application {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
+            infoButt.setVisible(true);
         });
         payButt.setOnAction(val -> {
             Calendar expDate = Calendar.getInstance();
@@ -254,11 +259,173 @@ public class Main extends Application {
                     expDate.getTimeInMillis() - System.currentTimeMillis() > 0;
 
             if (required){
-                System.out.println("PP");
+                screen7(runnerCombo.getSelectionModel().getSelectedItem().toString(),charityName.getText(),amountLabel.getText());
             }
         });
+        plusButt.setOnAction(val -> {
+            Integer amount = Integer.parseInt(amountLabel.getText().substring(1));
+            amount+=10;
+            amountLabel.setText("$"+amount.toString());
+            amountField.setText(amount.toString());
+
+        });
+        minusButt.setOnAction(val -> {
+            Integer amount = Integer.parseInt(amountLabel.getText().substring(1));
+            if (amount>=10)amount-=10;
+            amountLabel.setText("$"+amount.toString());
+            amountField.setText(amount.toString());
+
+        });
+        amountField.setOnAction(val -> {
+            if(Integer.parseInt(amountField.getText()) > 0){
+                Integer amount = Integer.parseInt(amountField.getText());
+                amountLabel.setText("$"+amount.toString());
+            }
+        });
+        infoButt.setOnAction(val -> {
+            try {
+                Stage charityInfo = new Stage();
+                String charityString = charityName.getText();
+                ResultSet charityInfoRS = sqlExe("SELECT charityDescription FROM charity WHERE charityName = '"+charityString+"'");
+                charityInfoRS.next();
+                Label charityInfoHeader = new Label(charityString);
+                Text charityInfoText = new Text(charityInfoRS.getString("charityDescription"));
+                VBox mainDialogBox = new VBox(charityInfoHeader,charityInfoText);
+
+                mainDialogBox.setSpacing(15);
+                charityInfoText.setWrappingWidth(300);
+
+                charityInfo.setScene(new Scene(mainDialogBox,400,300));
+                charityInfo.show();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
 
+        });
+
+        backButton.setOnAction(val -> screen1());
+        cancelButt.setOnAction(val -> screen1());
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen7(String info,String charityName,String amount){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Label thxLabel = new Label("Thank you for your sponsorship!");
+        Text thxText = new Text("Thank you for your sponsorship again in Marathon Skillz 2019 Thank you for your sponsorship again in Marathon  Thank you for your sponsorship again in Marathon ");
+        Label sponInfoLabel = new Label(info);
+        Label charityNameLabel = new Label(charityName);
+        Label amountLabel = new Label(amount);
+        Button backButton2 = new Button("    Back    ");
+
+        VBox mainBox = new VBox(thxLabel,thxText,sponInfoLabel,charityNameLabel,amountLabel,backButton2);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(30);
+        thxText.setWrappingWidth(width-200);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+
+        //-----
+
+        backButton.setOnAction(val -> screen1());
+        backButton2.setOnAction(val -> screen1());
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen10(){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Label titleLabel = new Label("Find out more information");
+        Button[] butts = {
+                new Button("Marathon Skills 2019"),
+        new Button("Previous race results"),
+        new Button("BMI calculator"),
+        new Button("How long is a marathon?"),
+        new Button("List of charities"),
+        new Button("BMR calculator")
+        };
+
+        VBox leftButts = new VBox(butts[0],butts[1],butts[2]);
+        VBox rightButts = new VBox(butts[3],butts[4],butts[5]);
+        HBox boffSides = new HBox(leftButts,rightButts);
+        VBox mainBox = new VBox(titleLabel,boffSides);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(40);
+        boffSides.setSpacing(30);
+        rightButts.setSpacing(20);
+        leftButts.setSpacing(20);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        boffSides.setAlignment(Pos.CENTER);
+        leftButts.setAlignment(Pos.CENTER);
+        rightButts.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+        for (Button b:butts) {
+            b.setMinSize(250,50);
+        }
+
+        backButton.setOnAction(val -> screen1());
+
+        butts[4].setOnAction(val -> screen13());
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen13(){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        VBox mainBox = new VBox();
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
 
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
