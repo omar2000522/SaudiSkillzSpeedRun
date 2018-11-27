@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Font.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.omg.PortableInterceptor.INACTIVE;
@@ -134,6 +135,38 @@ public class Main extends Application {
         });
         infoButt.setOnAction(val -> screen10());
         loginButt.setOnAction(val -> screen3());
+        runnerButt.setOnAction(val -> screen2());
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen2(){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Button competedBeforeButt = new Button("I have competed before");
+        Button newCompButt = new Button("I am a new competitor");
+        VBox mainBox = new VBox(competedBeforeButt,newCompButt);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(20);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        competedBeforeButt.setPrefSize(400,50);
+        newCompButt.setPrefSize(400,50);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
 
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
@@ -472,6 +505,30 @@ public class Main extends Application {
         bottomBox.setPadding(new Insets(15));
         topBox.setStyle("-fx-background-color: #339966");
         bottomBox.setStyle("-fx-background-color: #339966");
+
+
+        butts[4].setOnAction(val -> {
+            Label contactTitleLabel = new Label("Contact Information");
+            Text descText = new Text("For more info please contact blah blah blah blah blah blah blah blah blah blah blah ");
+            Label phoneBoldLabel = new Label("Phone: ");
+            Label emailBoldLabel = new Label("Email: ");
+            Label phoneLabel = new Label("+966 65 8475 3887");
+            Label emailLabel = new Label("coordinators@marathonskills.org");
+            HBox phoneBox = new HBox(phoneBoldLabel,phoneLabel);
+            HBox emailBox = new HBox(emailBoldLabel,emailLabel);
+            VBox mainInfoBox = new VBox(contactTitleLabel,descText,phoneBox,emailBox);
+
+            phoneBoldLabel.setFont(Font.font("",FontWeight.BOLD,12));
+            emailBoldLabel.setFont(Font.font("",FontWeight.BOLD,12));
+            mainInfoBox.setAlignment(Pos.CENTER);
+            emailBox.setAlignment(Pos.CENTER);
+            phoneBox.setAlignment(Pos.CENTER);
+            mainInfoBox.setSpacing(20);
+
+            Stage contactInfoStage = new Stage();
+            contactInfoStage.setScene(new Scene(mainInfoBox,400,250));
+            contactInfoStage.show();
+        });
 
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
