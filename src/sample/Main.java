@@ -8,6 +8,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -17,6 +19,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.omg.PortableInterceptor.INACTIVE;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.*;
 import java.util.Calendar;
 
@@ -52,7 +56,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cpt01?useSSL=False","root","omar");
+        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cpt02?useSSL=False","root","omar");
         window = primaryStage;
         raceDate.set(2019,8,5,6,0);
         countDownThrd.start();
@@ -129,6 +133,84 @@ public class Main extends Application {
             }
         });
         infoButt.setOnAction(val -> screen10());
+        loginButt.setOnAction(val -> screen3());
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen3(){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Label titleLabel = new Label("Login Form");
+        Text desc = new Text("Login FormLogin FormLogin FormLogin FormLogin FormLogin FormLogin FormLogin Form");
+        Label emailLabel = new Label("Email: ");
+        Label passLabel = new Label("Password: ");
+        TextField emailField = new TextField("a.wenzinger@gmail.com");
+        TextField passField = new TextField("u!!CqiDD");
+        VBox labelsBox = new VBox(emailLabel,passLabel);
+        VBox fieldsBox = new VBox(emailField,passField);
+        HBox loginElement = new HBox(labelsBox,fieldsBox);
+        Button loginButt = new Button("Login");
+        Button cancelButt = new Button("Cancel");
+        HBox buttsBox = new HBox(loginButt,cancelButt);
+        VBox mainBox = new VBox(titleLabel,desc,loginElement,buttsBox);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(20);
+        buttsBox.setSpacing(15);
+        labelsBox.setSpacing(10);
+        fieldsBox.setSpacing(5);
+
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        loginElement.setAlignment(Pos.CENTER);
+        labelsBox.setAlignment(Pos.CENTER_RIGHT);
+        fieldsBox.setAlignment(Pos.CENTER_LEFT);
+        buttsBox.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+
+
+        loginButt.setOnAction(val -> {
+            try {
+                ResultSet user = sqlExe("SELECT * FROM user WHERE email ='"+emailField.getText()+"' AND password = '"+passField.getText()+"';");
+                user.next();
+                String roleId = user.getString("roleId");
+                switch (roleId){
+                    case "R":
+                        screen9();
+                        break;
+                    case "C":
+                        screen19();
+                        break;
+                    case "A":
+                        screen20();
+                        break;
+
+
+                }
+
+
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+
+        });
+
 
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
@@ -351,6 +433,49 @@ public class Main extends Application {
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
     }
+//RUNNER
+    public void screen9(){
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Label titleLabel = new Label("Runner menu");
+        Button[] butts = new Button[]{new Button("Register for an event"),
+                new Button("My race results"),
+                new Button("Edit your profile"),
+                new Button("My sponsorship"),
+                new Button("Contact information")};
+        VBox leftButts = new VBox(butts[0],butts[2],butts[4]);
+        VBox rightButts = new VBox(butts[1],butts[3]);
+        HBox allButts = new HBox(leftButts,rightButts);
+        VBox mainBox = new VBox(titleLabel,allButts);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(40);
+        leftButts.setSpacing(20);
+        rightButts.setSpacing(20);
+        allButts.setSpacing(20);
+        for (Button b:butts) b.setPrefSize(250,50);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        leftButts.setAlignment(Pos.TOP_CENTER);
+        rightButts.setAlignment(Pos.TOP_CENTER);
+        allButts.setAlignment(Pos.TOP_CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
 
     public void screen10(){
         BorderPane rootBorderPane = new BorderPane();
@@ -399,37 +524,156 @@ public class Main extends Application {
 
         backButton.setOnAction(val -> screen1());
 
-        butts[4].setOnAction(val -> screen13());
+        butts[4].setOnAction(val -> {
+            try {
+                screen13();
+            } catch (SQLException | FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
 
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
     }
 
-    public void screen13(){
+    public void screen13() throws SQLException, FileNotFoundException {
         BorderPane rootBorderPane = new BorderPane();
         Label headerLabel = new Label("Marathon Skills 2015");
         Button backButton = new Button("Back");
         HBox topBox = new HBox(backButton,headerLabel);
         HBox bottomBox = new HBox(countDownLabel);
-        VBox mainBox = new VBox();
+        Label titleLabel = new Label("List of charities");
+        Text desc = new Text("List of charitiesList of charitiesList of charitiesList of charitiesList of charitiesList of charitiesList of charitiesList of charitiesList of charities");
+        ScrollPane mainPane = new ScrollPane();
+        VBox mainBox = new VBox(titleLabel,desc);
 
         //=========proprieties==========
         headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        mainPane.setContent(mainBox);
         rootBorderPane.setTop(topBox);
         rootBorderPane.setBottom(bottomBox);
-        rootBorderPane.setCenter(mainBox);
+        rootBorderPane.setCenter(mainPane);
         topBox.setSpacing(20);
+        mainBox.setSpacing(20);
         topBox.setAlignment(Pos.CENTER_LEFT);
         mainBox.setAlignment(Pos.CENTER);
         bottomBox.setAlignment(Pos.CENTER);
+        desc.setWrappingWidth(600);
         topBox.setPadding(new Insets(20));
         bottomBox.setPadding(new Insets(15));
         topBox.setStyle("-fx-background-color: #339966");
         bottomBox.setStyle("-fx-background-color: #339966");
 
+        //------------code-------------------------
+        ResultSet charities = sqlExe("SELECT * FROM charity");
+        while (charities.next()){
+            Label currName = new Label(charities.getString("charityName"));
+            Text currDesc = new Text(charities.getString("charityDescription"));
+            String currImagePath = charities.getString("charityLogo");
+            ImageView currLogo = new ImageView(new Image(new FileInputStream("src/Images/"+currImagePath)));
+            VBox descAndTitle = new VBox(currName,currDesc);
+            HBox charityElement = new HBox(currLogo,descAndTitle);
+
+            currLogo.setPreserveRatio(true);
+            currLogo.setFitWidth(200);
+            currName.setFont(new Font(15));
+            currDesc.setWrappingWidth(500);
+            charityElement.setSpacing(15);
+            charityElement.setPadding(new Insets(5));
+            charityElement.setAlignment(Pos.CENTER);
+            charityElement.setStyle("-fx-border-color: black; -fx-border-width: 2;");
+            descAndTitle.setSpacing(10);
+            mainBox.getChildren().add(charityElement);
+        }
+
+
+        backButton.setOnAction(val -> screen10());
+
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
     }
+//COORD
+    public void screen19(){
+    BorderPane rootBorderPane = new BorderPane();
+    Label headerLabel = new Label("Marathon Skills 2015");
+    Button backButton = new Button("Back");
+    HBox topBox = new HBox(backButton,headerLabel);
+    HBox bottomBox = new HBox(countDownLabel);
+    Label titleLabel = new Label("Coordinator menu");
+    Button[] butts = new Button[]{new Button("Runners"),
+            new Button("Sponsorship")};
+    VBox leftButts = new VBox(butts[0]);
+    VBox rightButts = new VBox(butts[1]);
+    HBox allButts = new HBox(leftButts,rightButts);
+    VBox mainBox = new VBox(titleLabel,allButts);
+
+    //=========proprieties==========
+    headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+    rootBorderPane.setTop(topBox);
+    rootBorderPane.setBottom(bottomBox);
+    rootBorderPane.setCenter(mainBox);
+    topBox.setSpacing(20);
+    mainBox.setSpacing(40);
+    leftButts.setSpacing(20);
+    rightButts.setSpacing(20);
+    allButts.setSpacing(20);
+    for (Button b:butts) b.setPrefSize(250,50);
+    topBox.setAlignment(Pos.CENTER_LEFT);
+    mainBox.setAlignment(Pos.CENTER);
+    bottomBox.setAlignment(Pos.CENTER);
+    leftButts.setAlignment(Pos.TOP_CENTER);
+    rightButts.setAlignment(Pos.TOP_CENTER);
+    allButts.setAlignment(Pos.TOP_CENTER);
+    topBox.setPadding(new Insets(20));
+    bottomBox.setPadding(new Insets(15));
+    topBox.setStyle("-fx-background-color: #339966");
+    bottomBox.setStyle("-fx-background-color: #339966");
+
+    window.setScene(new Scene(rootBorderPane,width,height));
+    window.show();
+}
+//ADMIN
+    public void screen20(){
+    BorderPane rootBorderPane = new BorderPane();
+    Label headerLabel = new Label("Marathon Skills 2015");
+    Button backButton = new Button("Back");
+    HBox topBox = new HBox(backButton,headerLabel);
+    HBox bottomBox = new HBox(countDownLabel);
+    Label titleLabel = new Label("Administrator menu");
+    Button[] butts = new Button[]{new Button("Users"),
+            new Button("Volunteers"),
+            new Button("Charities"),
+            new Button("Inventory")};
+    VBox leftButts = new VBox(butts[0],butts[2]);
+    VBox rightButts = new VBox(butts[1],butts[3]);
+    HBox allButts = new HBox(leftButts,rightButts);
+    VBox mainBox = new VBox(titleLabel,allButts);
+
+    //=========proprieties==========
+    headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+    rootBorderPane.setTop(topBox);
+    rootBorderPane.setBottom(bottomBox);
+    rootBorderPane.setCenter(mainBox);
+    topBox.setSpacing(20);
+    mainBox.setSpacing(40);
+    leftButts.setSpacing(20);
+    rightButts.setSpacing(20);
+    allButts.setSpacing(20);
+    for (Button b:butts) b.setPrefSize(250,50);
+    topBox.setAlignment(Pos.CENTER_LEFT);
+    mainBox.setAlignment(Pos.CENTER);
+    bottomBox.setAlignment(Pos.CENTER);
+    leftButts.setAlignment(Pos.TOP_CENTER);
+    rightButts.setAlignment(Pos.TOP_CENTER);
+    allButts.setAlignment(Pos.TOP_CENTER);
+    topBox.setPadding(new Insets(20));
+    bottomBox.setPadding(new Insets(15));
+    topBox.setStyle("-fx-background-color: #339966");
+    bottomBox.setStyle("-fx-background-color: #339966");
+
+    window.setScene(new Scene(rootBorderPane,width,height));
+    window.show();
+}
 
     public ResultSet sqlExe(String query) throws SQLException {
         Statement stmnt = conn.createStatement();
