@@ -168,6 +168,14 @@ public class Main extends Application {
         topBox.setStyle("-fx-background-color: #339966");
         bottomBox.setStyle("-fx-background-color: #339966");
 
+        newCompButt.setOnAction(val -> {
+            try {
+                screen4();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+
         window.setScene(new Scene(rootBorderPane,width,height));
         window.show();
     }
@@ -243,6 +251,111 @@ public class Main extends Application {
 
 
         });
+
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
+    public void screen4() throws SQLException {
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+        Label titleLabel = new Label("Register as a runner");
+        Text descText = new Text("Please fill outPlease fill outPlease fill outPlease fill outPlease fill outPlease fill outPlease fill out");
+
+        //left side
+        Label emailLabel = new Label("Email: ");
+        Label pwLabel = new Label("Password: ");
+        Label pwALabel = new Label("Password Again: ");
+        Label firstNLabel = new Label("First Name: ");
+        Label lastNLabel = new Label("Last Name: ");
+        VBox leftLabelsBox = new VBox(emailLabel,pwLabel,pwALabel,firstNLabel,lastNLabel);
+        TextField emailField = new TextField();
+        TextField pwField = new TextField();
+        TextField pwAField = new TextField();
+        TextField firstNField = new TextField();
+        TextField lastNField = new TextField();
+        VBox leftFieldsBox = new VBox(emailField,pwField,pwAField,firstNField,lastNField);
+        HBox leftSide = new HBox(leftLabelsBox,leftFieldsBox);
+
+        //right side
+        Label genderLabel = new Label("Gender: ");
+        Label DOBLabel = new Label("Date of Birth: ");
+        Label countryLabel = new Label("Country: ");
+        VBox rightlabelsBox = new VBox(genderLabel,DOBLabel,countryLabel);
+        ComboBox genderCombo = new ComboBox();
+        DatePicker DOBpicker = new DatePicker();
+        ComboBox countryCombo = new ComboBox();
+        VBox rightFieldsBox = new VBox(genderCombo,DOBpicker,countryCombo);
+        HBox rightSide = new HBox(rightlabelsBox,rightFieldsBox);
+
+        HBox bothSides = new HBox(leftSide,rightSide);
+        Button regButt = new Button("Register");
+        Button cancelButt = new Button("Cancel");
+        HBox buttsBox = new HBox(regButt,cancelButt);
+        VBox mainBox = new VBox(titleLabel,descText,bothSides,buttsBox);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        topBox.setSpacing(20);
+        mainBox.setSpacing(20);
+        leftSide.setSpacing(10);
+        rightSide.setSpacing(10);
+        buttsBox.setSpacing(20);
+        leftLabelsBox.setSpacing(12);
+        leftFieldsBox.setSpacing(5);
+        rightlabelsBox.setSpacing(12);
+        rightFieldsBox.setSpacing(5);
+        bothSides.setSpacing(40);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        leftFieldsBox.setAlignment(Pos.CENTER_LEFT);
+        leftLabelsBox.setAlignment(Pos.CENTER_RIGHT);
+        leftSide.setAlignment(Pos.CENTER);
+        rightFieldsBox.setAlignment(Pos.CENTER_LEFT);
+        rightlabelsBox.setAlignment(Pos.CENTER_RIGHT);
+        rightSide.setAlignment(Pos.CENTER);
+        buttsBox.setAlignment(Pos.CENTER);
+        bothSides.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+
+
+        //----------sql-data-filling-----------
+        ResultSet genders = sqlExe("SELECT * FROM gender");
+        while (genders.next()) genderCombo.getItems().add(genders.getString("gender"));
+        ResultSet countries = sqlExe("SELECT countryName FROM country");
+        while (countries.next()) countryCombo.getItems().add(countries.getString("countryName"));
+
+        //----------code-------------
+        regButt.setOnAction(val -> {
+            boolean allFieldsFilled = !emailField.getText().isEmpty() && !pwField.getText().isEmpty()
+                    && !pwAField.getText().isEmpty()  && !firstNField.getText().isEmpty()
+                    && !lastNField.getText().isEmpty()  && !genderCombo.getSelectionModel().isEmpty()
+                    && !countryCombo.getSelectionModel().isEmpty() && DOBpicker.getValue() != null;
+            boolean emailMatch = emailField.getText().matches("(.*)[@](.*)[.](.*)");
+            boolean pwReq = pwField.getText().equals(pwAField.getText()) && pwField.getText().length()>5
+                    && pwField.getText().matches(".[!@#$%^]") && pwField.getText().matches(".[\\d]");
+            System.out.println(pwField.getText().matches("[!@#$%^]"));
+
+            Calendar now = Calendar.getInstance();
+            now.setTimeInMillis(System.currentTimeMillis());
+            Calendar DOB = Calendar.getInstance();
+            DOB.set(DOBpicker.getValue().getYear(), DOBpicker.getValue().getMonthValue(), DOBpicker.getValue().getDayOfMonth());
+            boolean dateReq = now.get(Calendar.YEAR) - DOB.get(Calendar.YEAR) >= 10;
+        });
+        cancelButt.setOnAction(val -> {System.out.println(DOBpicker.getValue());});
+
+
 
 
         window.setScene(new Scene(rootBorderPane,width,height));
