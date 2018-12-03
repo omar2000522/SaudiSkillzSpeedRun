@@ -338,20 +338,35 @@ public class Main extends Application {
 
         //----------code-------------
         regButt.setOnAction(val -> {
+            String pw = pwField.getText();
+
             boolean allFieldsFilled = !emailField.getText().isEmpty() && !pwField.getText().isEmpty()
                     && !pwAField.getText().isEmpty()  && !firstNField.getText().isEmpty()
                     && !lastNField.getText().isEmpty()  && !genderCombo.getSelectionModel().isEmpty()
                     && !countryCombo.getSelectionModel().isEmpty() && DOBpicker.getValue() != null;
             boolean emailMatch = emailField.getText().matches("(.*)[@](.*)[.](.*)");
-            boolean pwReq = pwField.getText().equals(pwAField.getText()) && pwField.getText().length()>5
-                    && pwField.getText().matches(".[!@#$%^]") && pwField.getText().matches(".[\\d]");
-            System.out.println(pwField.getText().matches("[!@#$%^]"));
+            boolean pwReq =
+                    (pw.contains("!")||pw.contains("@")||pw.contains("#")||pw.contains("$")||pw.contains("%")||pw.contains("^")) &&
+                            (!pw.toLowerCase().equals(pw) && !pw.toUpperCase().equals(pw)) &&
+                            (pw.contains("1")||pw.contains("2")||pw.contains("3")||pw.contains("4")||pw.contains("5")||pw.contains("6")||pw.contains("7")||pw.contains("8")||pw.contains("9")||pw.contains("0")) &&
+                            (pw.length()>=6) && pw.equals(pwAField.getText());
+            System.out.println(pwReq);
 
             Calendar now = Calendar.getInstance();
             now.setTimeInMillis(System.currentTimeMillis());
             Calendar DOB = Calendar.getInstance();
             DOB.set(DOBpicker.getValue().getYear(), DOBpicker.getValue().getMonthValue(), DOBpicker.getValue().getDayOfMonth());
             boolean dateReq = now.get(Calendar.YEAR) - DOB.get(Calendar.YEAR) >= 10;
+
+            if (dateReq && emailMatch && pwReq && allFieldsFilled) {
+                try {
+                    sqlExeIU("INSERT INTO user VALUES ('"+emailField.getText()+"','"+pw+"','"+firstNField.getText()+"','"+lastNField.getText()+"','R');");
+                    sqlExeIU("INSERT INTO runner (Email,Gender,DateOfBirth,CountryCode) VALUES ('"+emailField.getText()+"','"+genderCombo.getSelectionModel().getSelectedItem().toString()+"','"+DOB.get(Calendar.YEAR)+"-"+DOB.get(Calendar.MONTH)+"-"+DOB.get(Calendar.DAY_OF_MONTH)+"',(SELECT CountryCode FROM country WHERE CountryName = '"+countryCombo.getSelectionModel().getSelectedItem().toString()+"'));");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
         });
         cancelButt.setOnAction(val -> {System.out.println(DOBpicker.getValue());});
 
@@ -849,6 +864,12 @@ public class Main extends Application {
         Statement stmnt = conn.createStatement();
         System.out.println("Executing query...");
         return stmnt.executeQuery(query);
+    }
+
+    public boolean sqlExeIU(String query) throws SQLException {
+        Statement stmnt = conn.createStatement();
+        System.out.println("Executing query...");
+        return stmnt.execute(query);
     }
 
     public static void main(String[] args) {
