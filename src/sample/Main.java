@@ -403,10 +403,21 @@ public class Main extends Application {
             checkBoxes.add(currEvent);
             topLeft.getChildren().add(currEvent);
         }
+        //--------------------------------------
 
-
-        VBox topRight = new VBox();
-
+        Label kitOptLabel = new Label("Race Kit Options");
+        VBox topRight = new VBox(kitOptLabel);
+        ToggleGroup options = new ToggleGroup();
+        //---------getting-sql-data---------------
+        ResultSet optionsRS = sqlExe("SELECT * FROM raceKitOption;");
+        while (optionsRS.next()) {
+            RadioButton currOpt = new RadioButton("Option " + optionsRS.getString("raceKitOptionId") +
+                    " ($" + optionsRS.getString("cost") + "): " +
+                    optionsRS.getString("raceKitOption") + ".");
+            currOpt.setToggleGroup(options);
+            topRight.getChildren().add(currOpt);
+            options.selectToggle(currOpt);
+        }
         VBox mainBox = new VBox(titleLabel,desc,elementsPane);
 
         //=========proprieties==========
@@ -415,7 +426,7 @@ public class Main extends Application {
         rootBorderPane.setBottom(bottomBox);
         rootBorderPane.setCenter(mainBox);
         elementsPane.add(topLeft,0,0);
-//        elementsPane.add(1,1,1);
+        elementsPane.add(topRight,1,0);
 //        elementsPane.add();
 //        elementsPane.add();
         elementsPane.setGridLinesVisible(true);
