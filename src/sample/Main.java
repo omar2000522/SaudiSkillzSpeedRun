@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.deploy.panel.RadioPropertyGroup;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -23,6 +25,7 @@ import org.omg.PortableInterceptor.INACTIVE;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class Main extends Application {
@@ -377,6 +380,60 @@ public class Main extends Application {
         window.show();
     }
 
+    public void screen5() throws SQLException {
+        BorderPane rootBorderPane = new BorderPane();
+        Label headerLabel = new Label("Marathon Skills 2015");
+        Button backButton = new Button("Back");
+        HBox topBox = new HBox(backButton,headerLabel);
+        HBox bottomBox = new HBox(countDownLabel);
+
+        Label titleLabel = new Label("Register for an event");
+        Text desc = new Text("Register for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an eventRegister for an event");
+        GridPane elementsPane = new GridPane();
+
+        //top left
+        Label compEventLabel = new Label("Competition Events");
+        VBox topLeft =  new VBox(compEventLabel);
+        //----------getting-events--------------
+        ResultSet eventsRS = sqlExe("SELECT * FROM event WHERE marathonId = 5;");
+        ArrayList<CheckBox> checkBoxes = new ArrayList<>();
+        while (eventsRS.next()){
+            CheckBox currEvent = new CheckBox(eventsRS.getString("eventName")+" ($"+
+                    eventsRS.getString("cost")+")");
+            checkBoxes.add(currEvent);
+            topLeft.getChildren().add(currEvent);
+        }
+
+
+        VBox topRight = new VBox();
+
+        VBox mainBox = new VBox(titleLabel,desc,elementsPane);
+
+        //=========proprieties==========
+        headerLabel.setFont(Font.font("Open Sans", FontWeight.SEMI_BOLD,24));
+        rootBorderPane.setTop(topBox);
+        rootBorderPane.setBottom(bottomBox);
+        rootBorderPane.setCenter(mainBox);
+        elementsPane.add(topLeft,0,0);
+//        elementsPane.add(1,1,1);
+//        elementsPane.add();
+//        elementsPane.add();
+        elementsPane.setGridLinesVisible(true);
+        elementsPane.setAlignment(Pos.CENTER);
+        topBox.setSpacing(20);
+        desc.setWrappingWidth(width-200);
+        topBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(20));
+        bottomBox.setPadding(new Insets(15));
+        topBox.setStyle("-fx-background-color: #339966");
+        bottomBox.setStyle("-fx-background-color: #339966");
+
+        window.setScene(new Scene(rootBorderPane,width,height));
+        window.show();
+    }
+
     public void screen6() throws SQLException {
         BorderPane rootBorderPane = new BorderPane();
         Label headerLabel = new Label("Marathon Skills 2015");
@@ -656,6 +713,13 @@ public class Main extends Application {
             Stage contactInfoStage = new Stage();
             contactInfoStage.setScene(new Scene(mainInfoBox,400,250));
             contactInfoStage.show();
+        });
+        butts[0].setOnAction(val -> {
+            try {
+                screen5();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         });
 
         window.setScene(new Scene(rootBorderPane,width,height));
